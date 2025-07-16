@@ -36,6 +36,13 @@ async function run() {
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
 
+
+
+    app.get('/services', async (req, res) => {
+        const result = await serviceCollection.find().toArray();
+        res.send(result);
+    })
+
     app.post('/services', async (req, res) => {
         const post = req.body;
         const result = await serviceCollection.insertOne(post);
