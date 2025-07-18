@@ -43,7 +43,6 @@ async function run() {
         const { email } = req.query;
         const query = email ? { email: email } : {};
         const result = await serviceCollection.find(query).toArray();
-        console.log(result);
         res.send(result);
     })
 
@@ -78,6 +77,15 @@ async function run() {
         res.send(result);
     })
 
+    app.get('/reviews', async (req, res) => {
+        const { email } = req.query;
+        const query = email ? { email: email } : {};
+        const result = await reviewCollection.find(query).toArray();
+        console.log(query);
+
+        res.send(result);
+    })
+
     app.get('/reviews/:id', async (req, res) => {
         const id = req.params.id;
         const query = { serviceId: id }
@@ -88,6 +96,13 @@ async function run() {
     app.post('/reviews', async (req, res) => {
         const post = req.body;
         const result = await reviewCollection.insertOne(post);
+        res.send(result);
+    })
+
+    app.delete('/reviews/:id', async (req, res) => {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) }
+        const result = await reviewCollection.deleteOne(query);
         res.send(result);
     })
 
