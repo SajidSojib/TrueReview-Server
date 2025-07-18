@@ -40,7 +40,10 @@ async function run() {
 
 
     app.get('/services', async (req, res) => {
-        const result = await serviceCollection.find().toArray();
+        const { email } = req.query;
+        const query = email ? { email: email } : {};
+        const result = await serviceCollection.find(query).toArray();
+        console.log(result);
         res.send(result);
     })
 
@@ -57,8 +60,21 @@ async function run() {
         res.send(result);
     })
 
-    app.get('/reviews', async (req, res) => {
-        const result = await reviewCollection.find().toArray();
+    app.put('/services/:id', async (req, res) => {
+        const id = req.params.id;
+        const updatedService = req.body;
+        const query = { _id: new ObjectId(id) }
+        const updatedDoc = {
+            $set: {updatedService}
+        }
+        const result = await serviceCollection.updateOne(query, updatedDoc);
+        res.send(result);
+    })
+
+    app.get('/reviews/:id', async (req, res) => {
+        const id = req.params.id;
+        const query = { serviceId: id }
+        const result = await reviewCollection.find(query).toArray();
         res.send(result);
     })
 
