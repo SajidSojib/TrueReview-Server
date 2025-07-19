@@ -6,6 +6,7 @@ const app = express();
 const port = process.env.PORT || 9000;
 const admin = require("firebase-admin");
 const serviceAccount = require("./firebase-admin-key.json");
+const { getAuth } = require('firebase-admin/auth');
 
 app.use(cors());
 app.use(express.json());
@@ -157,6 +158,36 @@ async function run() {
         const id = req.params.id;
         const query = { _id: new ObjectId(id) }
         const result = await reviewCollection.deleteOne(query);
+        res.send(result);
+    })
+
+    app.get('/count', async (req, res) => {
+        const serviceCount = await serviceCollection.estimatedDocumentCount();
+        const reviewCount = await reviewCollection.estimatedDocumentCount();
+        let count = 0;
+        const listAllUsers = async (nextPageToken) => {
+          // List batch of users, 1000 at a time.
+          await getAuth()
+            .listUsers(1000, nextPageToken)
+            .then(async (listUsersResult) => {
+              listUsersResult.users.forEach((userRecord) => {
+                count++;
+              });
+              if (listUsersResult.pageToken) {
+                // List next batch of users.
+                await listAllUsers(listUsersResult.pageToken);
+              }
+            })
+            .catch((error) => {
+              console.log("Error listing users:", error);
+            });
+          return count;
+        };
+
+        // Start listing users from the beginning, 1000 at a time.
+        const userCount = await listAllUsers();
+
+        const result = {serviceCount, reviewCount, userCount};
         res.send(result);
     })
 
