@@ -1,5 +1,5 @@
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const express = require('express');
 const cors = require('cors');
 const app = express();
@@ -67,21 +67,40 @@ const verifyFirebaseToken = async (req, res, next) => {
 
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
 
     const serviceCollection = client.db('trueReview').collection('services');
     const reviewCollection = client.db('trueReview').collection('reviews');
 
-    await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
+    // await client.db("admin").command({ ping: 1 });
+    // console.log(
+    //   "Pinged your deployment. You successfully connected to MongoDB!"
+    // );
 
 
 
     app.get('/services', verifyFirebaseToken, verifyTokenEmail, async (req, res) => {
         const { email } = req.query;
-        const query = email ? { email: email } : {};
+        const { search } = req.query;
+        const {filterParam} = req.query;
+
+        let query = {};
+        if (email) {
+            query = { email: email }
+        }
+        if (search) {
+            query = {
+                $or: [
+                  { title: { $regex: search, $options: "i" } },
+                  { category: { $regex: search, $options: "i" } },
+                  { company: { $regex: search, $options: "i" } },
+                  { price: { $regex: search, $options: "i" } },
+                ],
+        }
+        };
+        if (filterParam) {
+            query = { category: filterParam }
+        }
         const result = await serviceCollection.find(query).toArray();
         res.send(result);
     })
