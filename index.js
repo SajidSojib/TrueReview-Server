@@ -5,7 +5,8 @@ const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 9000;
 const admin = require("firebase-admin");
-const serviceAccount = require("./firebase-admin-key.json");
+const fbKey = Buffer.from(process.env.FB_SERVICE_KEY, "base64").toString('utf-8')
+const serviceAccount = JSON.parse(fbKey);
 const { getAuth } = require('firebase-admin/auth');
 
 app.use(cors());
