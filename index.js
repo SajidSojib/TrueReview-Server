@@ -84,7 +84,7 @@ async function run() {
         const { email } = req.query;
         const { search } = req.query;
         const {filterParam} = req.query;
-
+        const { sortPrice } = req.query;
         let query = {};
         if (email) {
             query = { email: email }
@@ -99,10 +99,19 @@ async function run() {
                 ],
         }
         };
+
+        let sort={};
+        if(sortPrice==='asc') {
+            sort = { price: 1 }
+        }
+        if(sortPrice==='desc') {
+            sort = { price: -1 }
+        }
+
         if (filterParam) {
             query = { category: filterParam }
         }
-        const result = await serviceCollection.find(query).toArray();
+        const result = await serviceCollection.find(query).sort(sort).toArray();
         res.send(result);
     })
 
@@ -138,7 +147,7 @@ async function run() {
     })
 
     app.get('/limitedServices', async (req, res) => {
-        const result = await serviceCollection.find().limit(6).toArray();
+        const result = await serviceCollection.find().limit(8).toArray();
         res.send(result);
     })
 
@@ -206,7 +215,6 @@ async function run() {
 
         // Start listing users from the beginning, 1000 at a time.
         const userCount = await listAllUsers();
-
         const result = {serviceCount, reviewCount, userCount};
         res.send(result);
     })
